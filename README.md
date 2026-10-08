@@ -1,24 +1,53 @@
+# RedEduca - Landing Page Oficial (Grupo 1)
+
+Landing page institucional orientada a presentar la propuesta de valor de RedEduca y relevar instituciones educativas para el piloto.
+
+## Stack Tecnológico
+* **Framework:** Next.js (App Router)
+* **Lenguaje:** TypeScript
+* **Estilos:** Tailwind CSS
+* **Despliegue continuo:** Vercel
+* **Versión Node:** v20 (definido en `.nvmrc`)
+
+## Cómo ejecutar en local
+
+1. Clonar el repositorio:
+   ```bash
+   git clone [https://github.com/HernanJairo/impulso_rededuca_landing.git](https://github.com/HernanJairo/impulso_rededuca_landing.git)
+   cd impulso_rededuca_landing
+
 ## Flujo de Trabajo y Gestión de Ramas (Git Workflow)
 
-Para asegurar la calidad del código, evitar conflictos entre desarrolladores y mantener la estabilidad de la rama principal (`main`), el equipo adopta el siguiente flujo de trabajo:
+Para asegurar la calidad del código, el trabajo colaborativo y la estabilidad del proyecto, el equipo documenta la evolución y el estándar oficial de ramas:
 
-1. **Rama por tarjeta / tarea:**
-   * Toda funcionalidad, corrección o documentación se desarrolla en una rama independiente originada desde la versión actualizada de `main`.
-   * **Nomenclatura oficial:**
-     * `feat/nombre-seccion` (ej. `feat/seccion-hero`, `feat/seccion-problema`)
-     * `fix/descripcion-bug` (ej. `fix/padding-mobile`)
-     * `docs/nombre-tarea` (ej. `docs/flujo-ramas`)
-2. **Desarrollo aislado:**
-   * Queda estrictamente restringido realizar `commit` o `push` directo sobre la rama `main`.
-3. **Apertura obligatoria de Pull Request (PR):**
-   * Al finalizar la tarea y verificarla en el entorno local (`npm run dev`), el desarrollador sube su rama a GitHub y abre un Pull Request hacia `main`.
-   * El PR debe describir los cambios implementados y referenciar la tarjeta de Trello correspondiente.
-4. **Revisión por pares (Peer Review):**
-   * Ningún desarrollador puede aprobar o fusionar (*merge*) su propio código.
-   * Es obligatoria la revisión y aprobación formal del otro integrante de DEV (Jairo revisa a Lautaro / Lautaro revisa a Jairo).
-   * Criterios de auditoría: ausencia de errores en consola, tipado TypeScript estricto, uso adecuado de Tailwind CSS y diseño adaptativo (*Mobile First*).
-5. **Integración continua:**
-   * Una vez aprobado el PR, se realiza el merge hacia `main`. Vercel detecta automáticamente el cambio y despliega la nueva versión en producción.
+### 1. Fase Inicial: Puesta a Punto y Línea Base (main)
+* En la etapa inicial se configuró el proyecto base directamente sobre la rama principal (`main`), integrando:
+  * Un componente preliminar de prueba técnica (`Hero.tsx`) con estilos Tailwind CSS.
+  * La estructura de imágenes responsivas en `/public/images/`.
+  * La primera validación del circuito colaborativo mediante la rama `docs/flujo-ramas-y-hero`, con Pull Request y revisión por pares aprobada (Peer Review).
 
-> **Nota sobre maquetas preliminares:**  
-> Las secciones visuales integradas actualmente (como el Hero de ejemplo) tienen carácter de maqueta técnica para validar el entorno y los estilos base. Serán sustituidas por los componentes definitivos una vez que las áreas de Marketing (copy) y UX/UI (wireframe y paleta oficial) entreguen los insumos finales.
+---
+
+### 2. Estructura Oficial: Incorporación de Staging
+Siguiendo las pautas de coordinación, se formalizan dos ramas base permanentes en el repositorio:
+* **`main` (Producción):** Rama estable vinculada al despliegue final en Vercel.
+* **`staging` (Entorno de Pruebas):** Creada directamente como bifurcación de la versión actualizada de `main`, destinada a la integración y testeo previo de todas las tareas.
+
+---
+
+### 3. Flujo Oficial de Desarrollo (A partir de la Fase Actual)
+
+1. **Ramas por tarea (Feature branches):**
+   * Toda nueva funcionalidad o corrección se inicia siempre a partir de **`staging`**.
+   * Nomenclatura: `feat/nombre-seccion`, `fix/descripcion`, `docs/tarea`.
+2. **Pull Request obligatorio hacia Staging:**
+   * Al finalizar el desarrollo y verificarlo localmente (`npm run dev`), se abre un Pull Request dirigido a **`staging`** (no a `main`).
+3. **Revisión por Pares (Peer Review):**
+   * Es obligatoria la revisión técnica del otro desarrollador del equipo (revisión cruzada entre Jairo y Lautaro) mediante la función *Approve* de GitHub.
+4. **Pase a Producción (`staging` ➔ `main`):**
+   * Una vez que las tareas integradas en `staging` funcionan correctamente y sin conflictos, se genera el Pull Request general desde `staging` hacia `main` para publicar la versión oficial.
+
+---
+
+> **Aclaración sobre el Hero actual (Maqueta de Prueba Técnica):**  
+> El componente visual del Hero integrado en esta etapa tiene carácter estrictamente experimental. Su único propósito fue poner a prueba el flujo de trabajo (creación de ramas, Pull Request, revisión por pares, carga de assets estáticos y verificación del despliegue en Vercel). No representa el diseño ni los textos definitivos, los cuales serán reemplazados una vez que los equipos de UX/UI y Contenido entreguen los insumos finales
