@@ -1,11 +1,11 @@
-import Hero from '@/components/Hero';
-import { Navbar } from '@/components/Navbar';
+import Navbar from '../components/navegacion/Navbar';
+import FooterLanding from '../components/navegacion/footerLanding';
 
 export default function Home() {
   return (
-    <main className='min-h-screen bg-slate-950'>
+    <main className="min-h-screen bg-white w-full flex flex-col">
       <Navbar />
-      <Hero />
+      <FooterLanding />
     </main>
   );
 }
