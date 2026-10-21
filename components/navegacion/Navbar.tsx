@@ -28,7 +28,7 @@ const NAVBAR_CONFIG = {
     { name: 'Contacto', href: '#contacto' },
   ],
   cta: {
-    text: 'Quiero que mi institución participe', // Copy oficial definido por MKT
+    text: 'Postular Institucion', // Copy oficial definido por MKT
     href: '#formulario',
   },
 };
