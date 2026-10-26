@@ -1,16 +1,19 @@
-'use client';
-
-import React from 'react';
-import { 
-  MessageSquareShare, 
-  HeartHandshake, 
-  FolderKanban, 
-  Sparkles, 
-  CheckCircle2 
+import {
+  MessageSquareShare,
+  HeartHandshake,
+  FolderKanban,
+  Sparkles,
+  CheckCircle2,
 } from 'lucide-react';
+import Reveal from '@/components/ui/Reveal';
 
-export default function PropuestaSection() {
-  const ejes = [
+const PROPUESTA_CONFIG = {
+  eyebrow: 'La propuesta',
+  titleMain: 'Una comunidad educativa ',
+  titleAccent: 'más conectada.',
+  description:
+    'RedEduca busca contribuir a una mejor organización y comunicación en las instituciones educativas, teniendo en cuenta las necesidades de quienes forman parte de la comunidad: directivos, docentes, estudiantes y familias.',
+  ejes: [
     {
       icon: MessageSquareShare,
       badge: 'Familias y tutores',
@@ -43,78 +46,133 @@ export default function PropuestaSection() {
         'Impulsar nuevas oportunidades de colaboración y mejora dentro de la comunidad educativa, a partir de sus experiencias, necesidades y aportes.',
       impacto: 'Alivio administrativo y labor colaborativa',
     },
-  ];
+  ],
+};
 
+const SECTION_CLASSES = [
+  'w-full font-sans section-lazy',
+  'bg-background text-foreground',
+  'py-16 sm:py-20 lg:py-24',
+].join(' ');
+
+const EYEBROW_CLASSES = [
+  'inline-block px-4 py-1.5 rounded-full',
+  'bg-brand/10 border border-brand/30 text-brand-text',
+  'text-xs sm:text-sm font-semibold tracking-wide',
+].join(' ');
+
+const TITLE_CLASSES = [
+  'text-3xl sm:text-4xl lg:text-[44px]',
+  'font-extrabold tracking-tight text-foreground leading-[1.2]',
+].join(' ');
+
+const GRID_CLASSES = [
+  'w-full grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4',
+  'gap-6 lg:gap-7 items-stretch',
+].join(' ');
+
+// Solo se animan sombra y color de borde (nada de transition-all)
+const CARD_CLASSES = [
+  'group relative overflow-hidden h-full',
+  'flex flex-col justify-between rounded-3xl p-7 sm:p-8',
+  'bg-surface border border-line hover:border-brand/60',
+  'transition-[box-shadow,border-color] duration-300',
+  'hover:shadow-xl hover:shadow-brand/5',
+].join(' ');
+
+const TOP_BAR_CLASSES = [
+  'absolute inset-x-0 top-0 h-1.5',
+  'bg-gradient-to-r from-brand to-brand-dark',
+  'opacity-0 group-hover:opacity-100 transition-opacity duration-300',
+].join(' ');
+
+const ICON_BOX_CLASSES = [
+  'w-14 h-14 shrink-0 rounded-2xl flex items-center justify-center',
+  'bg-brand/10 border border-brand/20 text-brand-text',
+  'transition-colors duration-300',
+  'group-hover:bg-brand group-hover:text-white',
+].join(' ');
+
+const BADGE_CLASSES = [
+  'text-xs font-semibold px-3 py-1 rounded-full truncate',
+  'bg-surface-muted text-muted border border-line',
+].join(' ');
+
+const CARD_TITLE_CLASSES = [
+  'text-2xl font-bold text-foreground',
+  'transition-colors group-hover:text-brand-text',
+].join(' ');
+
+const IMPACT_CLASSES = [
+  'pt-5 mt-6 border-t border-line',
+  'flex items-center gap-2.5',
+  'text-xs sm:text-[13.5px] text-foreground font-medium',
+].join(' ');
+export default function PropuestaSection() {
   return (
-    <section 
-      id="propuesta" 
-      className="w-full bg-gradient-to-b from-white via-slate-50/70 to-[#F8FAFC] text-slate-900 pt-2 sm:pt-4 pb-8 sm:pb-12 lg:pb-14 font-['Poppins',sans-serif] scroll-mt-20"
-    >
-      {/* Contenedor sincronizado con el Hero y Problema */}
-      <div className="max-w-[1550px] mx-auto px-5 sm:px-8 lg:pl-10 lg:pr-6">
-        
-        {/* Contenedor alineado a la izquierda con el mismo translate */}
-        <div className="w-full lg:translate-x-[118px] lg:max-w-[calc(100%-118px)] lg:pr-[118px]">
-          
-          {/* ENCABEZADO OFICIAL */}
+    <section id="propuesta" className={SECTION_CLASSES}>
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 xl:px-12">
+        {/* ENCABEZADO */}
+        <Reveal direction="up">
           <div className="text-left max-w-4xl mb-12 sm:mb-16 space-y-4">
             <div>
-              <span className="inline-block px-4 py-1.5 rounded-full bg-teal-50 border border-teal-200 text-[#0D9488] text-xs sm:text-sm font-bold tracking-wider uppercase shadow-2xs">
-                La propuesta
-              </span>
+              <span className={EYEBROW_CLASSES}>{PROPUESTA_CONFIG.eyebrow}</span>
             </div>
 
-            <h2 className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold tracking-tight text-slate-950 leading-[1.2]">
-              Una comunidad educativa <span className="text-[#0D9488]">más conectada.</span>
+            <h2 className={TITLE_CLASSES}>
+              {PROPUESTA_CONFIG.titleMain}
+              <span className="text-brand-text">{PROPUESTA_CONFIG.titleAccent}</span>
             </h2>
 
-            <p className="text-slate-600 text-base sm:text-lg lg:text-xl font-normal leading-relaxed max-w-3xl">
-              RedEduca busca contribuir a una mejor organización y comunicación en las instituciones educativas, teniendo en cuenta las necesidades de quienes forman parte de la comunidad: directivos, docentes, estudiantes y familias.
+            <p className="text-muted text-base sm:text-lg lg:text-xl leading-relaxed max-w-3xl">
+              {PROPUESTA_CONFIG.description}
             </p>
           </div>
+        </Reveal>
 
-          {/* GRID ADAPTABLE A CUALQUIER RESOLUCIÓN Y ZOOM */}
-          <div className="w-full grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-6 lg:gap-7 items-stretch">
-            {ejes.map((item, index) => {
-              const IconComponent = item.icon;
-              return (
-                <div 
-                  key={index}
-                  className="bg-white border border-slate-200/90 hover:border-teal-400 rounded-3xl p-7 sm:p-8 flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:shadow-teal-900/5 group relative overflow-hidden"
-                >
-                  <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#0D9488] to-teal-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  
+        {/* GRILLA: 1 columna, 2x2 desde md, 4 columnas desde 2xl */}
+        <div className={GRID_CLASSES}>
+          {PROPUESTA_CONFIG.ejes.map((item, index) => {
+            const IconComponent = item.icon;
+
+            return (
+              <Reveal
+                key={item.title}
+                direction="up"
+                delay={(index + 1) * 100}
+                className="h-full"
+              >
+                <article className={CARD_CLASSES}>
+                  <div className={TOP_BAR_CLASSES} aria-hidden="true" />
+
                   <div className="space-y-5">
                     <div className="flex items-center justify-between gap-2">
-                      <div className="w-14 h-14 rounded-2xl bg-teal-50 border border-teal-200/70 flex items-center justify-center text-[#0D9488] group-hover:bg-[#0D9488] group-hover:text-white transition-all duration-300 shadow-2xs shrink-0">
-                        <IconComponent className="w-7 h-7" />
+                      <div className={ICON_BOX_CLASSES}>
+                        <IconComponent className="w-7 h-7" aria-hidden="true" />
                       </div>
-                      <span className="text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200/70 truncate">
-                        {item.badge}
-                      </span>
+                      <span className={BADGE_CLASSES}>{item.badge}</span>
                     </div>
 
                     <div className="space-y-3">
-                      <h3 className="text-2xl font-bold text-slate-900 group-hover:text-[#0D9488] transition-colors">
-                        {item.title}
-                      </h3>
-                      <p className="text-slate-600 text-[14.5px] sm:text-base leading-relaxed font-normal">
+                      <h3 className={CARD_TITLE_CLASSES}>{item.title}</h3>
+                      <p className="text-muted text-[14.5px] sm:text-base leading-relaxed">
                         {item.description}
                       </p>
                     </div>
                   </div>
 
-                  <div className="pt-5 mt-6 border-t border-slate-100 flex items-center gap-2.5 text-xs sm:text-[13.5px] text-slate-700 font-medium">
-                    <CheckCircle2 className="w-4 h-4 text-[#0D9488] shrink-0" />
+                  <div className={IMPACT_CLASSES}>
+                    <CheckCircle2
+                      className="w-4 h-4 text-brand-text shrink-0"
+                      aria-hidden="true"
+                    />
                     <span>{item.impacto}</span>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-
+                </article>
+              </Reveal>
+            );
+          })}
         </div>
-
       </div>
     </section>
   );

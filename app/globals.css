@@ -1,26 +1,176 @@
 @import "tailwindcss";
 
+/* Modo oscuro por clase (next-themes pone la clase "dark" en <html>) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ==========================================================================
+    1. VARIABLES DE TEMA (cambian entre claro y oscuro)
+   ========================================================================== */
 :root {
+  color-scheme: light;
+  --header-h: 5rem; /* alto aproximado del Navbar */
+
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0f172a;
+  --surface: #ffffff;
+  --surface-muted: #f8fafc;
+  --line: #e2e8f0;
+  --muted: #475569;
+
+  /* Colores de marca que necesitan cambiar para mantener el contraste */
+  --brand-text: #0f766e; /* teal para texto chico: 5,5:1 sobre blanco */
+  --navy: #1e3a8a;
+  --danger: #881337;
 }
 
+.dark {
+  color-scheme: dark;
+
+  --background: #0b1014;
+  --foreground: #e2e8f0;
+  --surface: #111820;
+  --surface-muted: #0f151b;
+  --line: #25303b;
+  --muted: #94a3b8;
+
+  --brand-text: #2dd4bf;
+  --navy: #93c5fd;
+  --danger: #fda4af;
+}
+
+/* ==========================================================================
+    2. TOKENS DE TAILWIND (generan bg-brand, text-navy, border-line, etc.)
+   ========================================================================== */
 @theme inline {
+  /* Se adaptan al modo */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-line: var(--line);
+  --color-muted: var(--muted);
+  --color-brand-text: var(--brand-text);
+  --color-navy: var(--navy);
+  --color-danger: var(--danger);
+
+  /* Fijos: iguales en claro y oscuro */
+  --color-brand: #0d9488;
+  --color-brand-dark: #0f766e;
+  --color-footer: #10151a;
+
+  /* Poppins con respaldo de fuentes del sistema si no carga */
+  --font-sans: var(--font-poppins), system-ui, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Animaciones propias (reemplazan a animate-in, que no está instalado) */
+@theme {
+  --animate-fade-in: fade-in 0.3s ease-out both;
+  --animate-slide-down: slide-down 0.25s ease-out both;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-down {
+    from {
+      opacity: 0;
+      transform: translateY(-0.5rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ==========================================================================
+    3. BASE
+   ========================================================================== */
+@layer base {
+  html {
+    /* Única fuente del espacio al saltar a un anchor (no usar scroll-mt en secciones) */
+    scroll-padding-top: var(--header-h);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+
+  ::selection {
+    background-color: rgb(13 148 136 / 0.25);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+}
+
+/* ==========================================================================
+    4. EFECTO DE APARICIÓN AL HACER SCROLL
+    Solo anima opacity y transform (aceleradas por GPU, sin layout).
+    Se activa únicamente si hay JavaScript y el usuario no pidió menos movimiento:
+    sin JS o con "reducir movimiento", el contenido se ve siempre.
+   ========================================================================== */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  [data-reveal] {
+    opacity: 0;
+    transition:
+      opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  [data-reveal="up"] {
+    transform: translate3d(0, 1.75rem, 0);
+  }
+  [data-reveal="left"] {
+    transform: translate3d(-2rem, 0, 0);
+  }
+  [data-reveal="right"] {
+    transform: translate3d(2rem, 0, 0);
+  }
+  [data-reveal="scale"] {
+    transform: scale(0.94);
+  }
+
+  [data-reveal][data-revealed] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ==========================================================================
+    5. RENDIMIENTO: el navegador no pinta secciones lejanas hasta acercarse.
+    Usar la clase "section-lazy" en las secciones de abajo (NO en el Hero).
+   ========================================================================== */
+.section-lazy {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 700px;
+}
+
+/* ==========================================================================
+    6. ACCESIBILIDAD: respetar "reducir movimiento" (el spinner de carga se mantiene)
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *:where(:not(.animate-spin)),
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

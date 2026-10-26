@@ -1,20 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { Menu, X, ArrowRight } from 'lucide-react';
+import ThemeSelector from '@/components/theme/ThemeSelector';
 
-/**
- * ============================================================================
- * CONFIGURACIÓN CENTRALIZADA (NAVBAR_CONFIG)
- * ============================================================================
- * Facilita modificar textos, rutas y accesos directos desde un solo lugar
- * sin tener que alterar la estructura del JSX.
- */
 const NAVBAR_CONFIG = {
   logo: {
-    src: '/images/logo.webp', // Ruta estática optimizada alojada en public/images
-    alt: 'Logo RedEduca',
+    src: '/images/logo.webp',
+    alt: '',
     titleMain: 'Red',
     titleAccent: 'Educa',
   },
@@ -28,159 +22,226 @@ const NAVBAR_CONFIG = {
     { name: 'Contacto', href: '#contacto' },
   ],
   cta: {
-    text: 'Postular Institucion', // Copy oficial definido por MKT
+    text: 'Postular institución',
     href: '#formulario',
   },
 };
 
-/**
- * Componente de Navegación Principal (Header)
- * 
- * Responsabilidades:
- * - Detección de scroll para aplicar elevación y desenfoque (backdrop-blur).
- * - Control de bloqueo de scroll en el body cuando el menú móvil está abierto.
- * - Navegación accesible (teclado, ARIA labels y contraste apto para auditorías).
- */
+const MOBILE_MENU_ID = 'mobile-menu';
+
+const HEADER_BASE = [
+  'sticky top-0 z-50 w-full h-[var(--header-h)] font-sans',
+  'flex items-center border-b backdrop-blur-md',
+  'transition-shadow duration-300',
+].join(' ');
+
+const HEADER_TOP = 'bg-background/90 border-line/60';
+const HEADER_SCROLLED = 'bg-background/95 border-line shadow-sm';
+
+const CONTAINER_CLASSES = [
+  'w-full max-w-7xl mx-auto px-5 sm:px-8 xl:px-12',
+  'flex items-center justify-between gap-4 xl:gap-6',
+].join(' ');
+
+const LOGO_LINK_CLASSES = [
+  'group flex shrink-0 items-center gap-2.5 rounded-lg',
+  'focus-visible:outline-none focus-visible:ring-2',
+  'focus-visible:ring-brand focus-visible:ring-offset-2',
+  'focus-visible:ring-offset-background',
+].join(' ');
+
+const LOGO_BOX_CLASSES = [
+  'relative flex h-10 w-10 items-center justify-center rounded-xl',
+  'bg-brand/10 transition-transform duration-200 group-hover:scale-105',
+].join(' ');
+
+const NAV_LINK_CLASSES = [
+  'relative whitespace-nowrap py-1 text-sm font-medium text-foreground',
+  'transition-colors hover:text-brand-text',
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-sm',
+  "after:content-[''] after:absolute after:inset-x-0 after:bottom-0",
+  'after:h-0.5 after:bg-brand after:origin-left after:scale-x-0',
+  'after:transition-transform after:duration-300',
+  'hover:after:scale-x-100',
+].join(' ');
+
+const CTA_DESKTOP_CLASSES = [
+  'group hidden xl:inline-flex items-center gap-2 whitespace-nowrap rounded-xl',
+  'bg-brand-dark px-5 py-2.5 text-sm font-bold text-white shadow-sm',
+  'transition-colors duration-200 hover:bg-brand active:scale-[0.98]',
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
+  'focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+].join(' ');
+
+const CTA_MOBILE_CLASSES = [
+  'group flex w-full items-center justify-center gap-2 rounded-xl',
+  'bg-brand-dark py-3.5 text-sm font-bold text-white shadow-md',
+  'transition-colors hover:bg-brand active:scale-[0.98]',
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
+  'focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+].join(' ');
+
+const BURGER_CLASSES = [
+  'xl:hidden shrink-0 rounded-lg p-2 text-foreground',
+  'transition-colors hover:bg-surface-muted',
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
+].join(' ');
+
+const MOBILE_PANEL_CLASSES = [
+  'xl:hidden absolute inset-x-0 top-full animate-slide-down',
+  'max-h-[calc(100dvh-var(--header-h))] overflow-y-auto',
+  'border-b border-line bg-background shadow-xl px-6 py-6 space-y-4',
+].join(' ');
+
+const MOBILE_LINK_CLASSES = [
+  'rounded-lg px-3 py-2.5 text-base font-medium text-foreground',
+  'transition-colors hover:bg-surface-muted hover:text-brand-text',
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
+].join(' ');
+
 export default function Navbar() {
-  // Estado para alternar el menú desplegable en dispositivos móviles
   const [isOpen, setIsOpen] = useState(false);
-
-  // Estado que detecta si el usuario hizo scroll para variar la sombra y fondo
   const [isScrolled, setIsScrolled] = useState(false);
+  const burgerRef = useRef<HTMLButtonElement>(null);
 
-  // EFECTO 1: Escucha el scroll de la ventana para estilizar la barra superior
+  // EFECTO 1: sombra al hacer scroll
   useEffect(() => {
-    const handleScroll = () => {
-      // Activa sombra si el usuario desciende más de 15 píxeles
-      setIsScrolled(window.scrollY > 15);
-    };
-
+    const handleScroll = () => setIsScrolled(window.scrollY > 15);
+    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // EFECTO 2: Bloquea el scroll del fondo cuando el modal móvil está activo
+  // EFECTO 2: bloquear scroll del body con el menú abierto
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-
-    // Cleanup: Restaura el comportamiento estándar si el componente se desmonta
+    document.body.style.overflow = isOpen ? 'hidden' : '';
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
     };
   }, [isOpen]);
 
-  // Cierra el menú al presionar un enlace de anclaje
-  const handleLinkClick = () => {
-    setIsOpen(false);
-  };
+  // EFECTO 3: cerrar con Escape y al escalar a pantalla de escritorio (>=1280px)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+        burgerRef.current?.focus();
+      }
+    };
+
+    const mq = window.matchMedia('(min-width: 1280px)');
+    const onChange = (e: MediaQueryListEvent) => {
+      if (e.matches) setIsOpen(false);
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    mq.addEventListener('change', onChange);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      mq.removeEventListener('change', onChange);
+    };
+  }, [isOpen]);
+
+  const handleLinkClick = () => setIsOpen(false);
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-all duration-300 font-sans ${
-        isScrolled
-          ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-200/80 py-3'
-          : 'bg-white/90 backdrop-blur-sm border-b border-slate-100 py-4'
-      }`}
+      className={`${HEADER_BASE} ${isScrolled || isOpen ? HEADER_SCROLLED : HEADER_TOP}`}
     >
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 flex items-center justify-between">
-        
-        {/* ==================================================================
-            1. ISOTIPO Y LOGOTIPO DE MARCA
-            ================================================================== */}
-        <a 
-          href="#inicio" 
+      <div className={CONTAINER_CLASSES}>
+        {/* 1. LOGO */}
+        <a
+          href="#inicio"
           onClick={handleLinkClick}
-          className="flex items-center gap-2.5 group cursor-pointer"
+          className={LOGO_LINK_CLASSES}
           aria-label="Ir al inicio de RedEduca"
         >
-          <div className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-teal-50 group-hover:scale-105 transition-transform duration-200">
+          <div className={LOGO_BOX_CLASSES}>
             <Image
               src={NAVBAR_CONFIG.logo.src}
               alt={NAVBAR_CONFIG.logo.alt}
               width={32}
               height={32}
               priority
-              className="w-8 h-8 object-contain"
+              className="h-8 w-8 object-contain"
             />
           </div>
-          <span className="text-2xl font-extrabold tracking-tight text-[#1E3A8A]">
+          <span className="text-2xl font-extrabold tracking-tight text-navy">
             {NAVBAR_CONFIG.logo.titleMain}
-            <span className="text-[#0D9488]">{NAVBAR_CONFIG.logo.titleAccent}</span>
+            <span className="text-brand-text">{NAVBAR_CONFIG.logo.titleAccent}</span>
           </span>
         </a>
 
-        {/* ==================================================================
-            2. MENÚ DE ENLACES PARA ESCRITORIO (Desktop >= 1024px)
-            ================================================================== */}
-        <nav className="hidden lg:flex items-center gap-7" aria-label="Navegación principal">
+        {/* 2. MENÚ DESKTOP (>= 1280px) */}
+        <nav
+          className="hidden xl:flex items-center gap-6 2xl:gap-8"
+          aria-label="Navegación principal"
+        >
           {NAVBAR_CONFIG.links.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="text-sm font-medium text-slate-800 hover:text-[#0D9488] transition-colors relative py-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-[#0D9488] hover:after:w-full after:transition-all after:duration-300"
-            >
+            <a key={link.href} href={link.href} className={NAV_LINK_CLASSES}>
               {link.name}
             </a>
           ))}
         </nav>
 
-        {/* ==================================================================
-            3. BOTÓN CTA PRINCIPAL (Desktop)
-            ================================================================== */}
-        <div className="hidden lg:block">
-          <a
-            href={NAVBAR_CONFIG.cta.href}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0F766E] hover:bg-[#0D655E] active:scale-95 text-white font-bold text-sm rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
-          >
-            {NAVBAR_CONFIG.cta.text}
-            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
-          </a>
-        </div>
+        {/* 3. GRUPO DERECHO: Selector de modo + CTA (desktop) + Hamburguesa (mobile/tablet) */}
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          <ThemeSelector />
 
-        {/* ==================================================================
-            4. BOTÓN DISPARADOR MENÚ MÓVIL (Hamburguesa / Cerrar)
-            ================================================================== */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="lg:hidden p-2 rounded-lg text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors"
-          aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú principal'}
-          aria-expanded={isOpen}
-        >
-          {isOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
-        </button>
+          <a href={NAVBAR_CONFIG.cta.href} className={CTA_DESKTOP_CLASSES}>
+            {NAVBAR_CONFIG.cta.text}
+            <ArrowRight
+              className="h-4 w-4 transition-transform group-hover:translate-x-1"
+              aria-hidden="true"
+            />
+          </a>
+
+          <button
+            ref={burgerRef}
+            type="button"
+            onClick={() => setIsOpen((prev) => !prev)}
+            className={BURGER_CLASSES}
+            aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú principal'}
+            aria-expanded={isOpen}
+            aria-controls={MOBILE_MENU_ID}
+          >
+            {isOpen ? (
+              <X className="h-7 w-7" aria-hidden="true" />
+            ) : (
+              <Menu className="h-7 w-7" aria-hidden="true" />
+            )}
+          </button>
+        </div>
       </div>
 
-      {/* ==================================================================
-          5. CONTENEDOR DESPLEGABLE MÓVIL
-          ================================================================== */}
+      {/* 4. MENÚ MÓVIL (DESPLEGABLE) */}
       {isOpen && (
-        <div className="lg:hidden fixed inset-x-0 top-[65px] bg-white border-b border-slate-200 shadow-xl px-6 py-6 space-y-4 animate-in slide-in-from-top-3 duration-200 max-h-[calc(100vh-65px)] overflow-y-auto">
-          <nav className="flex flex-col space-y-2" aria-label="Navegación móvil">
+        <div id={MOBILE_MENU_ID} className={MOBILE_PANEL_CLASSES}>
+          <nav className="flex flex-col space-y-1" aria-label="Navegación móvil">
             {NAVBAR_CONFIG.links.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
                 onClick={handleLinkClick}
-                className="text-base font-medium text-slate-800 hover:text-[#0D9488] hover:bg-teal-50/60 px-3 py-2.5 rounded-lg transition-colors"
+                className={MOBILE_LINK_CLASSES}
               >
                 {link.name}
               </a>
             ))}
           </nav>
-
-          {/* CTA Mobile al pie del menú */}
-          <div className="pt-4 border-t border-slate-100">
+          <div className="border-t border-line pt-4">
             <a
               href={NAVBAR_CONFIG.cta.href}
               onClick={handleLinkClick}
-              className="flex items-center justify-center gap-2 w-full py-3.5 bg-[#0F766E] hover:bg-[#0D655E] active:scale-98 text-white font-bold rounded-xl shadow-md text-sm transition-all"
+              className={CTA_MOBILE_CLASSES}
             >
               {NAVBAR_CONFIG.cta.text}
-              <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              <ArrowRight
+                className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                aria-hidden="true"
+              />
             </a>
           </div>
         </div>

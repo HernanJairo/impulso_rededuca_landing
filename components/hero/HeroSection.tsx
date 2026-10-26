@@ -1,16 +1,6 @@
-'use client';
-
-import React from 'react';
 import Link from 'next/link';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 
-/**
- * ============================================================================
- * CONFIGURACIÓN CENTRALIZADA: HERO_CONFIG
- * ============================================================================
- * Centraliza los textos aprobados por MKT y los recursos multimedia
- * para facilitar modificaciones sin alterar la arquitectura JSX.
- */
 const HERO_CONFIG = {
   badge: 'Programa Piloto Institucional 2026',
   headline: {
@@ -30,109 +20,145 @@ const HERO_CONFIG = {
     },
   },
   images: {
-    desktop: '/images/hero/hero-desktop.webp',
-    tablet: '/images/hero/hero-tablet.webp',
-    mobile: '/images/hero/hero-mobile.webp',
-    alt: 'Aula digital RedEduca con estudiantes y docente',
+    desktop: '/images/hero/hero-desktop.webp', // 2400x960
+    tablet: '/images/hero/hero-tablet.webp', // 1400x820
+    mobile: '/images/hero/hero-mobile.webp', // 900x675
+    alt: 'Docente y estudiantes trabajando juntos con una computadora en un aula',
   },
 };
 
-/**
- * Componente: HeroSection
- * 
- * Responsabilidades:
- * - Primera sección de impacto visual (Above the fold).
- * - Manejo adaptativo de imágenes (`picture` con breakpoints para desktop, tablet y mobile).
- * - Efectos de iluminación sutiles (degradados para fundir la imagen con el fondo blanco institucional).
- * - Jerarquía tipográfica accesible para optimización SEO (h1 único con leading proporcionado).
- */
+// Breakpoint del diseño superpuesto: xl = 1280px.
+// Por debajo: tarjeta arriba e imagen abajo (apilado).
+
+const SECTION_CLASSES = [
+  'relative isolate w-full overflow-hidden font-sans',
+  'bg-background text-foreground',
+  'xl:aspect-[5/2] xl:min-h-[560px] xl:max-h-[780px]',
+].join(' ');
+
+// En xl el contenedor "desaparece" (contents) y la tarjeta se ancla a la sección
+const STACK_WRAPPER_CLASSES = [
+  'mx-auto max-w-7xl px-5 sm:px-8 py-8 sm:py-12 xl:contents',
+].join(' ');
+
+const CARD_POSITION_CLASSES = [
+  'xl:absolute xl:inset-y-0 xl:left-[3%] xl:flex xl:items-center',
+  'xl:w-[34%] 2xl:w-[36%] xl:max-w-[560px]',
+].join(' ');
+
+const CARD_CLASSES = [
+  'w-full space-y-5 text-left animate-fade-in',
+  'xl:rounded-3xl xl:border xl:border-line/60 xl:bg-surface/85',
+  'xl:backdrop-blur-md xl:shadow-xl xl:shadow-black/5',
+  'xl:p-[clamp(1.25rem,2vw,2rem)]',
+].join(' ');
+
+const BADGE_CLASSES = [
+  'inline-flex items-center gap-2 rounded-full px-3.5 py-1.5',
+  'border border-brand/30 bg-brand/10 text-brand-text',
+  'text-xs sm:text-sm font-semibold tracking-wide',
+].join(' ');
+
+const TITLE_CLASSES = [
+  'text-3xl sm:text-4xl xl:text-[clamp(1.875rem,2.6vw,2.75rem)]',
+  'font-extrabold tracking-tight leading-[1.15] text-foreground',
+].join(' ');
+
+const DESCRIPTION_CLASSES = [
+  'text-base sm:text-[17px] xl:text-[clamp(0.9375rem,1.1vw,1.0625rem)]',
+  'leading-relaxed text-muted max-w-prose',
+].join(' ');
+
+const CTA_GROUP_CLASSES = [
+  'flex flex-col sm:flex-row xl:flex-col 2xl:flex-row gap-3 pt-2',
+].join(' ');
+
+const PRIMARY_CTA_CLASSES = [
+  'group inline-flex items-center justify-center gap-2 rounded-xl',
+  'w-full sm:w-auto xl:w-full 2xl:w-auto px-6 py-3.5',
+  'bg-brand-dark text-white font-bold text-sm sm:text-base text-center',
+  'shadow-md transition-colors duration-200 hover:bg-brand-dark/90',
+  'active:scale-[0.98]',
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
+  'focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+].join(' ');
+
+const SECONDARY_CTA_CLASSES = [
+  'inline-flex items-center justify-center rounded-xl',
+  'w-full sm:w-auto xl:w-full 2xl:w-auto px-5 py-3.5',
+  'border border-line bg-surface text-foreground font-semibold',
+  'text-sm sm:text-base text-center shadow-xs',
+  'transition-colors hover:bg-surface-muted hover:text-navy',
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
+  'focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+].join(' ');
+
+const IMAGE_WRAPPER_CLASSES = [
+  'mt-7 overflow-hidden rounded-2xl border border-line shadow-md',
+  'xl:mt-0 xl:absolute xl:inset-0 xl:-z-10',
+  'xl:rounded-none xl:border-0 xl:shadow-none',
+].join(' ');
+
+const IMAGE_CLASSES = [
+  'block w-full aspect-[4/3] sm:aspect-[1400/820] object-cover',
+  'xl:h-full xl:aspect-auto xl:object-right',
+].join(' ');
 export default function HeroSection() {
   return (
-    <section
-      id="inicio"
-      className="relative w-full min-h-[calc(100vh-80px)] flex flex-col lg:flex-row items-center justify-center lg:justify-start overflow-hidden bg-white text-slate-900 font-sans"
-    >
-      {/* ==================================================================
-          1. CAPA VISUAL DE FONDO (Exclusiva para Desktop >= 1024px)
-          ================================================================== */}
-      <div 
-        className="hidden lg:block absolute inset-0 w-full h-full pointer-events-none select-none"
-        aria-hidden="true"
-      >
-        <picture className="w-full h-full block">
-          <source media="(min-width: 1024px)" srcSet={HERO_CONFIG.images.desktop} />
-          <img
-            src={HERO_CONFIG.images.desktop}
-            alt={HERO_CONFIG.images.alt}
-            fetchPriority="high"
-            className="w-full h-full object-cover object-[88%_center] lg:object-right"
-          />
-        </picture>
+    <section id="inicio" className={SECTION_CLASSES}>
+      <div className={STACK_WRAPPER_CLASSES}>
+        {/* TARJETA DE TEXTO */}
+        <div className={CARD_POSITION_CLASSES}>
+          <div className={CARD_CLASSES}>
+            <div className={BADGE_CLASSES}>
+              <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+              <span>{HERO_CONFIG.badge}</span>
+            </div>
 
-        {/* Degradados lineales de fundido para suavizar los cortes de la fotografía con el fondo */}
-        <div className="absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-white via-white/40 to-transparent pointer-events-none" />
-        <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-white to-transparent pointer-events-none" />
-      </div>
+            <h1 className={TITLE_CLASSES}>
+              <span className="block">{HERO_CONFIG.headline.part1}</span>
+              <span className="block text-brand-text">{HERO_CONFIG.headline.part2}</span>
+            </h1>
 
-      {/* ==================================================================
-          2. BLOQUE DE CONTENIDO PRINCIPAL Y LLAMADOS A LA ACCIÓN
-          ================================================================== */}
-      <div className="relative z-10 w-full max-w-[1550px] mx-auto px-5 sm:px-8 lg:pl-10 lg:pr-6 py-8 sm:py-12 lg:py-20 flex flex-col justify-center">
-        
-        {/* Contenedor flotante con efecto de cristal (backdrop-blur) en desktop */}
-        <div className="w-full max-w-full lg:max-w-[570px] lg:translate-x-[118px] lg:pb-[70px] bg-white lg:bg-white/85 lg:backdrop-blur-md p-0 lg:px-7 lg:py-9 rounded-3xl lg:border lg:border-white/90 lg:shadow-xl lg:shadow-slate-900/5 space-y-5 text-left">
-          
-          {/* Badge institucional de convocatoria */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-50 border border-teal-200 text-[#0D9488] text-xs sm:text-sm font-semibold tracking-wide shadow-xs">
-            <CheckCircle2 className="w-4 h-4 text-[#0D9488]" aria-hidden="true" />
-            <span>{HERO_CONFIG.badge}</span>
+            <p className={DESCRIPTION_CLASSES}>{HERO_CONFIG.description}</p>
+
+            <div className={CTA_GROUP_CLASSES}>
+              <Link href={HERO_CONFIG.ctas.primary.href} className={PRIMARY_CTA_CLASSES}>
+                <span>{HERO_CONFIG.ctas.primary.text}</span>
+                <ArrowRight
+                  className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
+                  aria-hidden="true"
+                />
+              </Link>
+
+              <Link href={HERO_CONFIG.ctas.secondary.href} className={SECONDARY_CTA_CLASSES}>
+                {HERO_CONFIG.ctas.secondary.text}
+              </Link>
+            </div>
           </div>
-
-          {/* Título de nivel 1 con acento cromático en la propuesta */}
-          <h1 className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold tracking-tight text-slate-950 leading-[1.15]">
-            <span className="block">{HERO_CONFIG.headline.part1}</span>
-            <span className="text-[#0D9488] block">{HERO_CONFIG.headline.part2}</span>
-          </h1>
-
-          {/* Bajada institucional de marketing */}
-          <p className="w-full text-base sm:text-[17px] text-slate-700 font-normal leading-relaxed">
-            {HERO_CONFIG.description}
-          </p>
-
-          {/* Grupo de acciones principales (Responsive: columna en móvil, fila en desktop) */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-2">
-            <Link
-              href={HERO_CONFIG.ctas.primary.href}
-              className="group inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 bg-[#0D9488] hover:bg-[#0f766e] active:scale-95 text-white font-bold rounded-xl shadow-md hover:shadow-teal-900/20 transition-all duration-200 text-center text-sm sm:text-base cursor-pointer"
-            >
-              <span>{HERO_CONFIG.ctas.primary.text}</span>
-              <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />
-            </Link>
-
-            <Link
-              href={HERO_CONFIG.ctas.secondary.href}
-              className="inline-flex items-center justify-center w-full sm:w-auto px-5 py-3.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 hover:text-[#1E3A8A] hover:border-slate-400 font-semibold rounded-xl text-center text-sm sm:text-base shadow-xs transition-colors"
-            >
-              {HERO_CONFIG.ctas.secondary.text}
-            </Link>
-          </div>
-
         </div>
 
-        {/* ==================================================================
-            3. IMAGEN PARA DISPOSITIVOS MÓVILES Y TABLETS (< 1024px)
-            ================================================================== */}
-        <div className="block lg:hidden w-full mt-7 overflow-hidden rounded-2xl border border-slate-200/90 shadow-md">
-          <picture className="w-full block">
+        {/* IMAGEN: un solo <picture>, el navegador baja solo la que corresponde */}
+        <div className={IMAGE_WRAPPER_CLASSES}>
+          <picture>
+            <source media="(min-width: 1280px)" srcSet={HERO_CONFIG.images.desktop} />
             <source media="(min-width: 640px)" srcSet={HERO_CONFIG.images.tablet} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={HERO_CONFIG.images.mobile}
               alt={HERO_CONFIG.images.alt}
-              className="w-full h-[360px] sm:h-[440px] object-cover object-bottom"
+              width={900}
+              height={675}
+              fetchPriority="high"
+              decoding="async"
+              className={IMAGE_CLASSES}
             />
           </picture>
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 hidden h-10 bg-gradient-to-b from-background via-background/40 to-transparent xl:block"
+            aria-hidden="true"
+          />
         </div>
-
       </div>
     </section>
   );
