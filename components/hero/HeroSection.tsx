@@ -22,7 +22,7 @@ const HERO_CONFIG = {
   images: {
     desktop: '/images/hero/hero-desktop.webp', // 2400x960
     tablet: '/images/hero/hero-tablet.webp', // 1400x820
-    mobile: '/images/hero/hero-mobile.webp', // 900x675
+    mobile: '/images/hero/hero-mobile.webp', // 800x800 (cuadrada)
     alt: 'Docente y estudiantes trabajando juntos con una computadora en un aula',
   },
 };
@@ -99,10 +99,12 @@ const IMAGE_WRAPPER_CLASSES = [
   'xl:rounded-none xl:border-0 xl:shadow-none',
 ].join(' ');
 
+// Móvil: cuadrada (1:1). Tablet (640-1279px): panorámica. Desktop: llena la sección.
 const IMAGE_CLASSES = [
-  'block w-full aspect-[4/3] sm:aspect-[1400/820] object-cover',
+  'block w-full aspect-square sm:aspect-[1400/820] object-cover',
   'xl:h-full xl:aspect-auto xl:object-right',
 ].join(' ');
+
 export default function HeroSection() {
   return (
     <section id="inicio" className={SECTION_CLASSES}>
@@ -147,8 +149,8 @@ export default function HeroSection() {
             <img
               src={HERO_CONFIG.images.mobile}
               alt={HERO_CONFIG.images.alt}
-              width={900}
-              height={675}
+              width={800}
+              height={800}
               fetchPriority="high"
               decoding="async"
               className={IMAGE_CLASSES}
