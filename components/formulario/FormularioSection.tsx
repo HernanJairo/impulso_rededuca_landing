@@ -11,11 +11,18 @@ import { CheckCircle2, AlertCircle, Loader2, Info } from 'lucide-react';
 import Reveal from '@/components/ui/Reveal';
 
 // Mientras sea false, el formulario NO envía nada y lo dice con claridad.
-// TODO (módulo de envío): al conectar el envío real (Server Action o route
-// handler), reemplazar el setTimeout de handleSubmit y pasar esto a true.
-const FORM_ENABLED = false;
+const FORM_ENABLED = true;
 
-type FormStatus = 'idle' | 'error' | 'sending' | 'success';
+// URL pública de la API (Render), sin "/" al final. Se configura en .env.local y en Vercel.
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+// La API gratis de Render se duerme: el primer envío puede tardar cerca de un minuto
+const SUBMIT_TIMEOUT_MS = 90000;
+
+const FAILED_MESSAGE =
+  'No pudimos enviar tu postulación. Tus datos siguen en pantalla: probá de nuevo en un rato.';
+
+type FormStatus = 'idle' | 'error' | 'sending' | 'success' | 'failed';
 
 type FieldName =
   | 'institucion'
@@ -180,6 +187,35 @@ function validateForm(data: FormDataState): FormErrors {
   return e;
 }
 
+// Traduce los nombres del formulario a los que espera la API (POST /leads)
+function toLeadBody(data: FormDataState, website: string) {
+  return {
+    institutionName: data.institucion.trim(),
+    contactName: data.contacto.trim(),
+    city: data.localidad.trim(),
+    contactRole: data.rol.trim(),
+    level: data.nivel,
+    contactChannel: data.contactoMedio.trim(),
+    studentCount: Number(data.alumnos.trim()),
+    comment: data.comentario.trim(),
+    privacyAccepted: data.privacidad,
+    website,
+  };
+}
+
+// Un 400 de la API trae { message: string | string[] }
+async function readApiMessage(res: Response): Promise<string> {
+  try {
+    const body: unknown = await res.json();
+    const message = (body as { message?: unknown } | null)?.message;
+    if (Array.isArray(message)) return message.filter((m) => typeof m === 'string').join(' ');
+    if (typeof message === 'string') return message;
+  } catch {
+    // Respuesta sin JSON: se usa el mensaje general
+  }
+  return FAILED_MESSAGE;
+}
+
 // ---- Clases (en constantes para que no se corten al pegar) ----
 const SECTION_CLASSES = [
   'relative w-full font-sans section-lazy',
@@ -254,22 +290,19 @@ export default function FormularioSection() {
   const [status, setStatus] = useState<FormStatus>('idle');
   const [formData, setFormData] = useState<FormDataState>(EMPTY_FORM);
   const [errors, setErrors] = useState<FormErrors>({});
+  const [failedMessage, setFailedMessage] = useState('');
+  // Campo trampa anti-spam: una persona nunca lo completa
+  const [website, setWebsite] = useState('');
 
   // Bloqueo anti-duplicado: se activa al instante, antes de que React re-renderice
   const submittingRef = useRef(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const successRef = useRef<HTMLHeadingElement>(null);
-
-  // Limpiar el temporizador si el componente se desmonta
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, []);
+  const failedRef = useRef<HTMLDivElement>(null);
 
   // Al terminar el envío, llevar el foco al mensaje de resultado
   useEffect(() => {
     if (status === 'success') successRef.current?.focus();
+    if (status === 'failed') failedRef.current?.focus();
   }, [status]);
 
   const errorCount = Object.keys(errors).length;
@@ -300,7 +333,7 @@ export default function FormularioSection() {
     if (first) document.getElementById(fieldId(first))?.focus();
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     // Si ya hay un envío en curso, se ignora (doble clic o Enter repetido)
@@ -316,20 +349,46 @@ export default function FormularioSection() {
 
     submittingRef.current = true;
     setErrors({});
+    setFailedMessage('');
     setStatus('sending');
 
-    // TODO (módulo de envío): reemplazar este temporizador por la llamada real
-    // (Server Action o route handler) con validación en el servidor, y manejar
-    // el estado de error de red. Por ahora SOLO SIMULA el envío.
-    timerRef.current = setTimeout(() => {
+    if (!FORM_ENABLED) {
       setStatus('success');
       submittingRef.current = false;
-    }, 1500);
+      return;
+    }
+
+    try {
+      if (!API_URL) throw new Error('Falta NEXT_PUBLIC_API_URL');
+
+      const res = await fetch(`${API_URL}/leads`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(toLeadBody(formData, website)),
+        signal: AbortSignal.timeout(SUBMIT_TIMEOUT_MS),
+      });
+
+      if (res.ok) {
+        setStatus('success');
+      } else {
+        // 400: se muestra lo que dice la API. 429, 5xx y el resto: mensaje general
+        setFailedMessage(res.status === 400 ? await readApiMessage(res) : FAILED_MESSAGE);
+        setStatus('failed');
+      }
+    } catch {
+      // Sin conexión, CORS o más de 90 segundos sin respuesta
+      setFailedMessage(FAILED_MESSAGE);
+      setStatus('failed');
+    } finally {
+      submittingRef.current = false;
+    }
   };
 
   const handleReset = () => {
     setFormData(EMPTY_FORM);
     setErrors({});
+    setFailedMessage('');
+    setWebsite('');
     setStatus('idle');
     requestAnimationFrame(() => document.getElementById(fieldId('institucion'))?.focus());
   };
@@ -445,8 +504,25 @@ export default function FormularioSection() {
                       />
                       <div>
                         <p className="font-bold text-brand-text">Enviando tu postulación…</p>
-                        <p className="text-xs text-muted">No cierres ni recargues esta página.</p>
+                        <p className="text-xs text-muted">
+                          Puede tardar hasta un minuto. No cierres ni recargues esta página.
+                        </p>
                       </div>
+                    </div>
+                  )}
+
+                  {status === 'failed' && (
+                    <div
+                      ref={failedRef}
+                      role="alert"
+                      tabIndex={-1}
+                      className={`${ERROR_SUMMARY_CLASSES} focus:outline-none`}
+                    >
+                      <AlertCircle
+                        className="mt-0.5 h-5 w-5 shrink-0 text-danger"
+                        aria-hidden="true"
+                      />
+                      <p className="font-bold text-danger">{failedMessage}</p>
                     </div>
                   )}
 
@@ -551,6 +627,18 @@ export default function FormularioSection() {
                     })}
                   </div>
 
+                  {/* CAMPO TRAMPA: oculto para personas; si viene completo, la API no guarda nada */}
+                  <input
+                    type="text"
+                    name="website"
+                    value={website}
+                    onChange={(e) => setWebsite(e.target.value)}
+                    className="hidden"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                  />
+
                   {/* CONSENTIMIENTO */}
                   {/* TODO (revisión legal): texto final del consentimiento, a definir
                       junto con el aviso de privacidad (Ley 25.326). */}
@@ -602,7 +690,7 @@ export default function FormularioSection() {
                       {isLocked ? (
                         <>
                           <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                          <span>Enviando...</span>
+                          <span>Enviando…</span>
                         </>
                       ) : (
                         <span>Enviar solicitud</span>
