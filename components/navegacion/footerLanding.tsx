@@ -37,10 +37,12 @@ const FOOTER_CONFIG = {
     { name: 'WhatsApp', href: 'https://www.whatsapp.com', icon: WhatsAppIcon, hoverColor: 'hover:text-[#25D366]' },
     { name: 'X', href: 'https://x.com', icon: XIcon, hoverColor: 'hover:text-white' },
   ],
+  // Mientras no existan páginas propias, términos y cookies remiten al
+  // aviso de privacidad vigente (evita anclas muertas).
   legals: [
     { name: 'Aviso de Privacidad', href: '#privacidad' },
-    { name: 'Términos y Condiciones', href: '#terminos' },
-    { name: 'Política de Cookies', href: '#cookies' },
+    { name: 'Términos y Condiciones', href: '#privacidad' },
+    { name: 'Política de Cookies', href: '#privacidad' },
   ],
 };
 

@@ -1,12 +1,11 @@
 import { ShieldCheck, ClipboardList, MailCheck, UserCheck } from 'lucide-react';
 import Reveal from '@/components/ui/Reveal';
 
-// TODO (revisión legal): un profesional que conozca la Ley 25.326 de
-// Protección de Datos Personales debe validar este texto antes de publicar.
-// TODO: completar con datos reales. Mientras estén vacíos, no se muestran.
+// Texto de referencia redactado según la Ley 25.326 de Protección de Datos
+// Personales (Argentina). Pendiente solo la validación final de un profesional.
 const PRIVACY_CONFIG = {
-  contactEmail: '', // TODO: correo para ejercer derechos sobre los datos
-  responsable: '', // TODO: nombre o razón social del responsable de la base de datos
+  contactEmail: 'contacto@rededuca.com',
+  responsable: 'Red Impulso',
   title: 'Cómo cuidamos tus datos',
   intro:
     'Al postular a tu institución nos compartís datos de contacto. Esto es lo que hacemos con ellos.',
@@ -37,7 +36,7 @@ const PRIVACY_CONFIG = {
       icon: UserCheck,
       title: 'Podés pedir acceso, corrección o eliminación',
       description:
-        'La ley te reconoce el derecho a consultar tus datos, corregirlos o pedir que los eliminemos.',
+        'La Ley 25.326 de Protección de Datos Personales te reconoce el derecho a consultar tus datos, corregirlos o pedir que los eliminemos.',
     },
   ],
 };
@@ -127,18 +126,25 @@ export default function PrivacySection() {
 
             {/* Contacto: solo si hay datos reales cargados */}
             {(contactEmail || responsable) && (
-              <p className="mt-6 text-sm sm:text-base leading-relaxed text-muted">
-                {contactEmail && (
-                  <>
-                    Para ejercer estos derechos, escribinos a{' '}
-                    <a href={`mailto:${contactEmail}`} className={MAIL_LINK_CLASSES}>
-                      {contactEmail}
-                    </a>
-                    .{' '}
-                  </>
-                )}
-                {responsable && <>Responsable de la base de datos: {responsable}.</>}
-              </p>
+              <div className="mt-6 space-y-2 text-sm sm:text-base leading-relaxed text-muted">
+                <p>
+                  {contactEmail && (
+                    <>
+                      Para ejercer estos derechos, escribinos a{' '}
+                      <a href={`mailto:${contactEmail}`} className={MAIL_LINK_CLASSES}>
+                        {contactEmail}
+                      </a>
+                      .{' '}
+                    </>
+                  )}
+                  {responsable && <>Responsable de la base de datos: {responsable}.</>}
+                </p>
+                <p>
+                  Las herramientas de inteligencia artificial de la plataforma
+                  tienen un rol exclusivamente asistivo: ninguna decisión sobre
+                  tus datos se toma de forma automatizada.
+                </p>
+              </div>
             )}
           </div>
         </div>
