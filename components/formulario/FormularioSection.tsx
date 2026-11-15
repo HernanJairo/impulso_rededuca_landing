@@ -142,9 +142,15 @@ const EMPTY_FORM: FormDataState = {
   privacidad: false,
 };
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-// Teléfono: opcional +, dígitos, espacios, guiones y paréntesis; se cuentan los dígitos aparte
-const PHONE_REGEX = /^\+?[\d\s()-]{8,20}$/;
+// Email estricto: el dominio no puede empezar ni terminar con guion y debe cerrar con una extensión de letras
+// (evita entradas como "a@b.com-" o "a@b.com.")
+const EMAIL_REGEX =
+  /^[A-Za-z0-9._%+-]+@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,}$/;
+// Teléfono estricto: "+" opcional al inicio, código de área opcional entre paréntesis
+// y grupos de dígitos separados por un único espacio o guion.
+// Debe terminar en dígito: bloquea guiones o símbolos sobrantes al final (ej: "388388388388-").
+// La cantidad de dígitos (8 a 15) se valida aparte.
+const PHONE_REGEX = /^\+?(?:\(\d+\)[ -]?)?\d+(?:[ -]\d+)*$/;
 
 const fieldId = (name: string) => `form-${name}`;
 
