@@ -363,7 +363,7 @@ export default function FormularioSection() {
 
       const res = await fetch(`${API_URL}/leads`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json; charset=utf-8' },
         body: JSON.stringify(toLeadBody(formData, website)),
         signal: AbortSignal.timeout(SUBMIT_TIMEOUT_MS),
       });
